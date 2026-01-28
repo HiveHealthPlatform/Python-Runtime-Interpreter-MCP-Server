@@ -34,6 +34,8 @@ class RunCodeResult(TypedDict, total=False):
     stderr: str
     artifacts: List[ArtifactMeta]
     feedback: str
+    script_code: str
+    requirements: List[str]
 
 
 async def run_code(
@@ -112,4 +114,10 @@ async def run_code(
     
     print(f"[PRIMCS] Total artifacts collected: {len(artifacts)}")
 
-    return {"stdout": out.decode(), "stderr": err.decode(), "artifacts": artifacts} 
+    return {
+        "stdout": out.decode(),
+        "stderr": err.decode(),
+        "artifacts": artifacts,
+        "script_code": code,
+        "requirements": requirements,
+    } 
