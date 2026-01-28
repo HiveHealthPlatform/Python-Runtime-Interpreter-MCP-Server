@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import base64
 import shutil
 import textwrap
 from pathlib import Path
@@ -21,6 +22,7 @@ class ArtifactMeta(TypedDict):
     relative_path: str
     size: int
     mime: str
+    data: str  # base64 encoded file content
 
 
 # Typed return for run_code results.
@@ -94,11 +96,20 @@ async def run_code(
                 continue  # skip files not in output_dir
             size = p.stat().st_size
             mime, _ = mimetypes.guess_type(str(p))
+            
+            # Read file and encode as base64
+            with open(p, 'rb') as f:
+                file_data = base64.b64encode(f.read()).decode('utf-8')
+            
+            print(f"[PRIMCS] Collected artifact: {rel_path.name}, size: {size}, mime: {mime}")
             artifacts.append({
                 "name": rel_path.name,
                 "relative_path": rel_path.as_posix(),
                 "size": size,
                 "mime": mime or "application/octet-stream",
+                "data": file_data,  # NEW: Include base64 encoded file data
             })
+    
+    print(f"[PRIMCS] Total artifacts collected: {len(artifacts)}")
 
     return {"stdout": out.decode(), "stderr": err.decode(), "artifacts": artifacts} 
