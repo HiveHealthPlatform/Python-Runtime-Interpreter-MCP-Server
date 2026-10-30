@@ -1,3 +1,10 @@
 fastmcp
-aiohttp 
+aiohttp
 aiofiles
+pandas
+openpyxl
+requests
+numpy
+matplotlib
+supabase
+xlsxwriter
