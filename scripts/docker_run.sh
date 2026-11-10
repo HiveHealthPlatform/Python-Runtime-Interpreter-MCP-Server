@@ -20,7 +20,7 @@ fi
 # Run the container
 
 echo "[docker_run] Starting Docker container..."
-docker run -d --name $CONTAINER_NAME -p $PORT:9000 --env-file .env $IMAGE_NAME
+docker run -d --name $CONTAINER_NAME -p 127.0.0.1:$PORT:9000 --env-file .env $IMAGE_NAME
 
 # Print the MCP server URL
 

@@ -12,27 +12,10 @@ import mimetypes
 from server.config import TIMEOUT_SECONDS, TMP_DIR
 import os
 
-# The sandbox runs model-written code. It must not inherit the server's secrets
-# (Supabase service key and the like). Only a fixed set of harmless variables is
-# passed through, plus anything deliberately exposed with a SANDBOX_ prefix.
-_SANDBOX_ENV_PASSTHROUGH = (
-    "PATH", "HOME", "LANG", "LC_ALL", "LC_CTYPE", "TZ", "TMPDIR", "TEMP", "TMP",
-    "PYTHONIOENCODING", "PYTHONUNBUFFERED", "PYTHONDONTWRITEBYTECODE",
-    "SSL_CERT_FILE", "REQUESTS_CA_BUNDLE", "HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY",
-    "MPLBACKEND",
-)
-
-
-def sandbox_environment() -> dict:
-    env = {k: v for k, v in os.environ.items() if k in _SANDBOX_ENV_PASSTHROUGH or k.startswith("SANDBOX_")}
-    env.setdefault("PYTHONIOENCODING", "utf-8")
-    env.setdefault("PYTHONUNBUFFERED", "1")
-    env.setdefault("MPLBACKEND", "Agg")
-    return env
 from server.sandbox.downloader import download_files
-from server.sandbox.env import create_virtualenv
+from server.sandbox.env import create_virtualenv, sandbox_environment
 
-__all__ = ["run_code"]
+__all__ = ["run_code", "sandbox_environment"]
 
 
 # Precise schema for each artifact entry.
