@@ -1,0 +1,9 @@
+# Built from the PRIMCS directory; never bake env files or local data (audit N3).
+.env
+.env.*
+.git/
+__pycache__/
+**/__pycache__/
+*.pyc
+.venv/
+venv/

@@ -14,6 +14,7 @@ from fastmcp import FastMCP
 from starlette.requests import Request
 from starlette.responses import FileResponse, Response
 from server.config import TMP_DIR
+from server.auth import SharedSecretVerifier, bearer_matches, load_auth_token
 import urllib.parse
 
 from server.tools import run_code as run_code_tool
@@ -25,7 +26,9 @@ from server.prompts import python_programmer as python_programmer_prompt
 logger = logging.getLogger(__name__)
 
 # Expose a globally named `mcp` so the FastMCP CLI can auto-discover it.
-mcp = FastMCP(name="primcs", version="0.1.0")
+# Fails at import when PRIMCS_AUTH_TOKEN is missing, so the server never starts open.
+_AUTH_TOKEN = load_auth_token()
+mcp = FastMCP(name="primcs", version="0.1.0", auth=SharedSecretVerifier(_AUTH_TOKEN))
 run_code_tool.register(mcp)
 persist_artifact_tool.register(mcp)
 workspace_inspect_tool.register(mcp)
@@ -39,6 +42,10 @@ async def get_artifact(request: Request) -> Response:
     in the "mcp-session-id" header. The URL path is the relative path returned by the tool
     (e.g. "plots/plot.png"), which is resolved under session_<id>/output/.
     """
+    # Custom routes are not covered by FastMCP's auth, so check the bearer here.
+    if not bearer_matches(request.headers.get("authorization"), _AUTH_TOKEN):
+        return Response("Unauthorized", status_code=401, headers={"WWW-Authenticate": "Bearer"})
+
     relative_path = request.path_params["relative_path"]
     relative_path = os.path.normpath(relative_path)
     if relative_path.startswith("..") or os.path.isabs(relative_path):

@@ -10,10 +10,12 @@ from typing import TypedDict, List
 import mimetypes
 
 from server.config import TIMEOUT_SECONDS, TMP_DIR
-from server.sandbox.downloader import download_files
-from server.sandbox.env import create_virtualenv
+import os
 
-__all__ = ["run_code"]
+from server.sandbox.downloader import download_files
+from server.sandbox.env import create_virtualenv, sandbox_environment
+
+__all__ = ["run_code", "sandbox_environment"]
 
 
 # Precise schema for each artifact entry.
@@ -78,6 +80,7 @@ async def run_code(
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
         cwd=work,
+        env=sandbox_environment(),
     )
 
     try:
